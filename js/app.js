@@ -35,6 +35,18 @@ function setupNav() {
   document.querySelectorAll('.nav-btn').forEach(b => {
     b.addEventListener('click', () => loadView(b.dataset.view));
   });
+  document.querySelectorAll('[data-scroll="feedback"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      loadView('home');
+      setTimeout(() => {
+        const fb = document.querySelector('.feedback-section');
+        if (fb) {
+          fb.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 200);
+    });
+  });
+
 }
 
 /* ---------- view registry ---------- */
