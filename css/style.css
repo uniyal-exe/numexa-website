@@ -432,3 +432,90 @@ html.has-custom-cursor * {
 .calc-keys .wide {
     grid-column: span 2;
 }
+
+/* ---------- feedback form ---------- */
+.feedback-section .panel {
+    max-width: 920px;
+    margin: 0 auto;
+}
+
+.feedback-form .fb-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.fb-input,
+.fb-textarea {
+    width: 100%;
+    background: #05080c;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    padding: 12px;
+    border-radius: 10px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.95rem;
+    outline: none;
+}
+
+.fb-textarea {
+    min-height: 120px;
+    resize: vertical;
+    margin-top: 10px;
+}
+
+.rating {
+    display: inline-flex;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.rating .star {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    padding: 6px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 1.25rem;
+    transition: transform .12s ease, color .12s ease, background .12s ease;
+}
+
+.rating .star:hover {
+    transform: translateY(-3px);
+    color: var(--accent);
+}
+
+.rating .star.selected {
+    color: #021118;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    border-color: rgba(34, 211, 238, 0.15);
+}
+
+.send-feedback {
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    color: #021118;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: none;
+    font-weight: 700;
+}
+
+@media (max-width: 720px) {
+    .feedback-form .fb-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .feedback-section .panel {
+        padding: 18px;
+    }
+}
+
+.calc-keys button {
+    box-shadow: inset 0 -2px 0 rgba(255, 255, 255, 0.03);
+}
+
+.calc-keys button:active {
+    transform: scale(0.97);
+}

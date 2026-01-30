@@ -133,7 +133,7 @@ function renderHome() {
             <p class="muted">Plot single-variable functions.</p>
             <div style="margin-top:10px">
               <code>sin(x) + 0.3*sin(3x)</code><br>
-              <button class="plot-btn" data-fn="sin(x) + 0.3*sin(3*x)">Plot</button>
+              
             </div>
           </div>
         </div>
@@ -163,7 +163,7 @@ function renderHome() {
               <div class="muted">Result: -cos(x) + C</div>
             </div>
           </div>
-
+        </div>
     </section>
 
     <section class="section">
@@ -185,11 +185,46 @@ function renderHome() {
         <a class="cta invite" href="#playground" onclick="loadView('playground')">Open Playground</a>
         <a class="cta invite" href="https://discord.com/oauth2/authorize?client_id=1460289617264775333&permissions=5629501681765440&scope=bot+applications.commands" style="margin-left:12px">Invite Bot</a>
       </div>
+    </section>     
+          <section class="section feedback-section">
+      <div class="panel">
+        <h2>Feedback & Suggestions</h2>
+        <p class="muted">Help us make Numexa better — report bugs, request features, or share ideas. Your input is anonymous unless you provide contact details.</p>
+        <div class="section-divider"></div>
+
+        <form id="feedbackForm" class="feedback-form" novalidate>
+          <div class="fb-grid">
+            <input id="fbName" class="fb-input" placeholder="Your name (optional)" aria-label="Your name">
+            <input id="fbEmail" class="fb-input" placeholder="Email (optional)" type="email" aria-label="Email address">
+          </div>
+
+          <label class="rating-label muted">How would you rate Numexa?</label>
+          <div id="fbRating" class="rating" role="radiogroup" aria-label="Rating">
+            <button type="button" class="star" data-value="1" aria-checked="false">☆</button>
+            <button type="button" class="star" data-value="2" aria-checked="false">☆</button>
+            <button type="button" class="star" data-value="3" aria-checked="false">☆</button>
+            <button type="button" class="star" data-value="4" aria-checked="false">☆</button>
+            <button type="button" class="star" data-value="5" aria-checked="false">☆</button>
+          </div>
+
+          <textarea id="fbMessage" class="fb-textarea" placeholder="Describe your suggestion or report (required)" required aria-label="Feedback message"></textarea>
+
+          <div style="display:flex;gap:12px;align-items:center;margin-top:12px">
+            <button type="submit" class="cta send-feedback">Send Feedback</button>
+            <div id="fbStatus" class="muted" aria-live="polite" style="min-width:220px"></div>
+          </div>
+        </form>
+      </div>
+    
+
     </section>
   `;
 
   // wire up quick interactions after render
-  wireHomeInteractions();
+  wireHomeInteractions()
+    ;
+  initFeedbackForm();
+
 }
 
 /* ---------- Playgorund view (long & app-like) ---------- */
@@ -201,32 +236,18 @@ function renderPlayground() {
     <section class="section">
       <div class="panel">
         <h1>Playground</h1>
-        <p class="muted">Switch between Calculator UI and Type Mode.</p>
+        <p class="muted">A fast, tactile calculator interface inspired by Discord bots.</p>
 
-        <div style="display:flex;gap:10px;align-items:center;margin:12px 0">
-          <span class="muted">Calculator</span>
-          <input type="checkbox" id="modeToggle">
-          <span class="muted">Type</span>
+        <div style="margin-top:16px">
+          <div id="playgroundArea"></div>
         </div>
-
-        <div id="playgroundArea"></div>
       </div>
     </section>
   `;
 
-  const area = document.getElementById("playgroundArea");
-  const toggle = document.getElementById("modeToggle");
-
-  toggle.onchange = () => {
-    toggle.checked ? renderTypeMode(area) : renderCalculatorUI(area);
-  };
-
-  renderCalculatorUI(area);
-
-
-
-
+  renderCalculatorUI(document.getElementById("playgroundArea"));
 }
+
 
 function renderCalculatorUI(area) {
   window.setCursorContext && window.setCursorContext("playground");
@@ -307,20 +328,6 @@ function renderCalculatorUI(area) {
 
 
 
-function renderTypeMode(area) {
-  area.innerHTML = `
-      <textarea id="editor" class="editor" placeholder="Type expressions here..."></textarea>
-      <button id="runAll" class="btn" style="margin-top:10px">Run</button>
-      <pre id="typeOut" class="panel" style="margin-top:10px"></pre>
-    `;
-  document.getElementById("runAll").onclick = () => {
-    evaluateAndRender(
-      document.getElementById("editor").value,
-      r => document.getElementById("typeOut").textContent = r
-    );
-  };
-
-}
 
 
 
@@ -444,15 +451,7 @@ function wireHomeInteractions() {
     });
   });
 
-  document.querySelectorAll('.plot-btn').forEach(b => {
-    b.addEventListener('click', () => {
-      loadView('playground');
-      setTimeout(() => { // after playground loads
-        const canvas = document.getElementById('plotCanvas');
-        plotExpression(b.dataset.fn, canvas);
-      }, 200);
-    });
-  });
+
 
   // input evaluation
   const inp = document.getElementById('homeExpr');
@@ -475,10 +474,15 @@ function evaluateAndRenderHome() {
 /* ---------- utility: evaluate using math.js and fallbacks ---------- */
 function evaluateAndRender(expression, cb) {
   try {
+    if (!window.math || !math.evaluate) {
+      cb("Math engine not loaded");
+      return;
+    }
+
     const cleaned = expression.replace(/\^/g, "**");
     const result = math.evaluate(cleaned);
     cb(Array.isArray(result) ? JSON.stringify(result) : String(result));
-  } catch {
+  } catch (err) {
     cb("Error: could not evaluate expression");
   }
 }
@@ -486,6 +490,102 @@ function evaluateAndRender(expression, cb) {
 /* ---------- history & toast ---------- */
 function showToast(text) {
   console.log('toast:', text);
+}
+function initFeedbackForm() {
+  const form = document.getElementById('feedbackForm');
+  if (!form) return;
+
+  const stars = Array.from(document.querySelectorAll('#fbRating .star'));
+  let rating = 0;
+
+  function updateStars() {
+    stars.forEach(s => {
+      const v = Number(s.dataset.value);
+      if (v <= rating) {
+        s.classList.add('selected');
+        s.textContent = '★';
+        s.setAttribute('aria-checked', 'true');
+      } else {
+        s.classList.remove('selected');
+        s.textContent = '☆';
+        s.setAttribute('aria-checked', 'false');
+      }
+    });
+  }
+
+  stars.forEach(s => {
+    s.addEventListener('click', () => {
+      rating = Number(s.dataset.value);
+      updateStars();
+    });
+    s.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter' || ev.key === ' ') {
+        ev.preventDefault();
+        rating = Number(s.dataset.value);
+        updateStars();
+      }
+    });
+  });
+
+  function showFBStatus(text, isError = false) {
+    const el = document.getElementById('fbStatus');
+    el.textContent = text;
+    el.style.color = isError ? 'salmon' : '';
+    if (!text) return;
+    setTimeout(() => { if (el.textContent === text) el.textContent = ''; }, 5000);
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('fbName').value.trim();
+    const email = document.getElementById('fbEmail').value.trim();
+    const message = document.getElementById('fbMessage').value.trim();
+
+    if (!message) { showFBStatus('Please enter a message.', true); return; }
+
+    const payload = {
+      name: name || null,
+      email: email || null,
+      message,
+      rating: rating || null,
+      ts: Date.now(),
+      page: location.pathname
+    };
+
+    // Save in localStorage as a reliable fallback
+    try {
+      const stored = JSON.parse(localStorage.getItem('numexa_feedback') || '[]');
+      stored.push(payload);
+      localStorage.setItem('numexa_feedback', JSON.stringify(stored));
+    } catch (err) {
+      console.warn('feedback local save error', err);
+    }
+
+    showFBStatus('Saved locally — attempting to send...');
+
+    // Try to send to server endpoint if it exists
+    try {
+      const res = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        showFBStatus('Thanks — feedback sent!');
+        form.reset();
+        rating = 0;
+        updateStars();
+      } else {
+        throw new Error('server responded ' + res.status);
+      }
+    } catch (err) {
+      console.warn('feedback send failed', err);
+      showFBStatus('Saved locally. Unable to send right now.', true);
+    }
+  });
+
+  // init state
+  updateStars();
 }
 
 
