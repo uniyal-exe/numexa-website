@@ -519,3 +519,26 @@ html.has-custom-cursor * {
 .calc-keys button:active {
     transform: scale(0.97);
 }
+
+.footer-credit {
+    margin-top: 40px;
+    padding-top: 20px;
+    text-align: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 0.9rem;
+}
+
+.footer-credit .credit-link {
+    margin-left: 8px;
+    font-weight: 700;
+    text-decoration: none;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    transition: opacity .2s ease, transform .2s ease;
+}
+
+.footer-credit .credit-link:hover {
+    opacity: 0.85;
+    transform: translateY(-2px);
+}
